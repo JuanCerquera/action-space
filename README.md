@@ -6,6 +6,8 @@ Bite-sized build. **No learning yet.** Target runtime: [SF Compute](https://docs
 
 ### 1. CLI + login (laptop)
 
+The install script is **bash/macOS/Linux only**. On Windows, run it in **WSL** or **Git Bash** — not PowerShell (`curl` there is an alias and will error on `-fsSL`).
+
 ```bash
 curl -fsSL https://cli.sfcompute.com | bash
 sf login
