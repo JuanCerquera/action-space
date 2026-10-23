@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env_isaaclab/
+
+# Isaac / Omniverse
+logs/
+output/
+*.log
+.nvidia-omniverse/
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Checkpoints / local runs
+runs/
+wandb/
+*.pt
+*.pth
