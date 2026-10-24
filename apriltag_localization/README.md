@@ -4,6 +4,11 @@ Camera feed with AprilTags in → drone pose out: **xyz (m) + quaternion (x, y, 
 Vision only: the pose comes from the AprilTags the Tello camera sees. The Tello's IMU yaw is used
 just to choose between the two mirror-image solutions a single tag can give.
 
+**Use this one on the real drones** (it has been run on Tello hardware). `tello/localizer.py` is the
+simulation-side localizer. Both use the same arena frame, but they read different tag maps:
+this folder uses `tag_map.json` (the organizers' measured tags), and `tello/localizer.py` uses
+`config/arena.json` (placeholder positions). Keep the two maps in sync before mixing poses from both.
+
 ## Quick start
 ```bash
 pip install -r requirements.txt
