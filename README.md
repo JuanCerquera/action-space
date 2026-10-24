@@ -6,12 +6,24 @@ one of them on SF Compute H100s, and packaged the winner as a drop-in policy for
 
 ![Strategy results](docs/img/results.png)
 
-**Interactive 3D replay:** download [`media/replay/replay3d_arena_gate.html`](media/replay/replay3d_arena_gate.html)
-and open it in a browser (self-contained, no install). Orbit the photographed room, pick any strategy,
-scrub through the rounds, and read each drone's floating name tag (`D2 · goalkeeper`, `A1 · bumped back`).
+## 3D simulation
+
+**Watch it in your browser: [Action Space 3D Replay](https://claude.ai/artifact/DrAFcaHEhee74NyaX3Azcw)**
+(interactive: pick a strategy, drag to orbit the room, scroll to zoom, scrub through the round; each
+drone's floating tag says what it is doing). The link is private until its owner shares it from the
+page's Share menu. The same page is in the repo as
+[`docs/web/action_space_3d.html`](docs/web/action_space_3d.html) (4 MB, download and open), and the
+full version with every recorded round as [`media/replay/replay3d_arena_gate.html`](media/replay/replay3d_arena_gate.html).
+
+![3D: taped mesh](docs/img/mesh_3d.gif)
+
+Blue defenders, red attackers, at their real heights (the thin stalks and floor shadows show height).
+The yellow bars hanging under the defenders are the taped mesh strips; the panels and the red goal box
+between them are the defended gap.
 
 ## Contents
 
+1. [3D simulation](#3d-simulation)
 1. [The game](#the-game)
 2. [The room](#the-room)
 3. [Strategies, with simulations](#strategies-with-simulations)
@@ -49,7 +61,8 @@ are the three zones of the 3-zone strategy (danger 1.65 m, combat 3.85 m, as tun
 
 ## Strategies, with simulations
 
-Each GIF is a real round from the simulator at real Tello speed, top view, the goal on the left. Blue
+Each GIF is a real round from the simulator at real Tello speed: top view (goal on the left) and, for
+the main strategies, the same round in 3D. Blue
 dots are our defenders, red dots the attackers, gray means down; the text next to each drone is what the
 controller is doing at that moment. All strategies are switches of one controller,
 `tello/controllers.py` (`BlockController`).
@@ -57,6 +70,8 @@ controller is doing at that moment. All strategies are switches of one controlle
 ### 1. Tuned blocking (default): 95.5% wins
 
 ![Tuned blocking](docs/img/block.gif)
+
+![Tuned blocking in 3D](docs/img/block_3d.gif)
 
 - Two **markers**, one per attacker. Each holds a point just in front of its attacker on the line from the
   attacker to the goal, aiming where the attacker will be 0.6 s later.
@@ -84,6 +99,8 @@ to normal blocking. In the GIF both attackers are caught within seconds. **This 
 
 ![Three zones](docs/img/layers.gif)
 
+![Three zones in 3D](docs/img/layers_3d.gif)
+
 - **Zone 3, outer:** a marker whose attacker is still out there does not chase; it waits at the
   combat-zone edge on its attacker's line ("hold L2").
 - **Zone 2, combat:** normal blocking and pushing.
@@ -107,6 +124,8 @@ front and retreats around the attacker to the defense point, becoming the new sw
 ### 5. Kamikaze keeper: 94.6% wins
 
 ![Kamikaze](docs/img/kamikaze.gif)
+
+![Kamikaze in 3D](docs/img/kamikaze_3d.gif)
 
 The defender nearest the goal is the keeper. It holds the line to the closest attacker inside a keeper
 zone, and when that attacker comes within strike range (1.44 m, tuned) it rams it at full speed, aiming
@@ -233,7 +252,9 @@ python scripts/fast_sim.py eval   --arena arena_gate --real_speed --task sticky 
 python scripts/fast_sim.py tune   --arena arena_gate --real_speed --out config/my_settings.json
 python scripts/fast_sim.py record --arena arena_gate --real_speed --tuned config/gate_layers.json --name my_clip --theme 40k
 ARENA_JSON=arena_gate python scripts/build_replay.py          # 2D + 3D replay pages in media/replay/
-python scripts/make_readme_media.py                            # the GIFs and charts in docs/img/
+python scripts/make_readme_media.py                            # top-view GIFs and charts in docs/img/
+python scripts/make_readme_3d.py                               # 3D GIFs (run from scripts/)
+python scripts/build_web_replay.py                             # light web 3D replay, docs/web/
 ```
 
 With Isaac Lab 2.3 / Isaac Sim 5.1: `scripts/play_arena.py` (live 3D viewer with Tello models),
