@@ -23,3 +23,6 @@ runs/
 wandb/
 *.pt
 *.pth
+
+# Camera recordings from the Tello test panel
+recordings/

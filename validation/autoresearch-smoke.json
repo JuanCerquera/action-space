@@ -1,0 +1,19 @@
+{
+  "date": "2026-10-23",
+  "platform": "SF Autoresearch",
+  "gpu": "NVIDIA H100 80GB HBM3",
+  "image": "nvcr.io/nvidia/isaac-lab@sha256:d47169952b55effb46dba8f79761d381532b521561ecba38a3019adc7648884b",
+  "script_sha256": "0aa10f72184aa9c2bcbb38e45e6684abda7fdfe5bd36a46479d76a4287f864bd",
+  "command": "python -u /home/isaaclab/action-space/scripts/01_scene.py --steps 2100 --check-hover --viz none",
+  "exit_code": 0,
+  "result": {
+    "steps": 2100,
+    "simulated_seconds": 10.5,
+    "max_drift_m": {
+      "defender": 0.006997369695454836,
+      "attacker": 0.007055256050080061
+    },
+    "hover_checked": true,
+    "device": "cuda:0"
+  }
+}

@@ -24,7 +24,9 @@ import threading
 import time
 import webbrowser
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from pathlib import Path
 
+import av
 import cv2
 from djitellopy import Tello
 
@@ -34,6 +36,111 @@ HOLD_S = 0.3  # stop moving if the page sends no rc update within this window
 KEEPALIVE_S = 1.0  # send a zero rc this often while hovering, so the Tello does not auto-land
 GROUNDED_S = 3.0  # height 0 for this long while "flying" means the drone landed on its own
 FRAME_S = 0.04  # ~25 fps video to the browser
+# Without overrun_nonfatal, FFmpeg's UDP buffer overrun ends the stream and the picture freezes.
+VIDEO_URL = f"udp://@0.0.0.0:{Tello.VS_UDP_PORT}?overrun_nonfatal=1&fifo_size=50000000"
+VIDEO_TIMEOUT_S = (5.0, 2.0)  # open, read: reopen the stream after this long without packets
+
+
+class VideoReader:
+    """Decodes the Tello's H.264 stream in the background and survives stalls.
+
+    djitellopy's BackgroundFrameRead blocks forever once packets stop and dies
+    on the first decode error, which freezes the picture. This skips bad
+    packets and reopens the stream after a read timeout. `frame` is BGR.
+    """
+
+    def __init__(self, url: str = VIDEO_URL):
+        self.url = url
+        self.frame = None
+        self.frame_time = 0.0
+        self.stopped = False
+        self.recorder = None  # Recorder that receives every decoded frame
+        threading.Thread(target=self._run, daemon=True).start()
+
+    def age(self) -> float:
+        """Seconds since the last decoded frame (inf before the first)."""
+        return time.monotonic() - self.frame_time if self.frame_time else float("inf")
+
+    def stop(self):
+        self.stopped = True
+
+    def _run(self):
+        while not self.stopped:
+            try:
+                container = av.open(self.url, timeout=VIDEO_TIMEOUT_S)
+            except Exception as exc:
+                print(f"[WARN] Video open failed ({exc}); retrying.")
+                time.sleep(1.0)
+                continue
+            try:
+                for packet in container.demux(video=0):
+                    if self.stopped:
+                        break
+                    try:
+                        frames = packet.decode()
+                    except av.error.FFmpegError:
+                        continue  # corrupt packet (UDP loss): skip it, the next keyframe recovers
+                    for frame in frames:
+                        self.frame = frame.to_ndarray(format="bgr24")
+                        self.frame_time = time.monotonic()
+                        recorder = self.recorder
+                        if recorder is not None:
+                            recorder.add(self.frame)
+                if not self.stopped:
+                    print("[WARN] Video stream ended; reopening.")
+            except Exception as exc:
+                if not self.stopped:
+                    print(f"[WARN] Video stalled ({type(exc).__name__}); reopening.")
+            finally:
+                container.close()
+
+
+class Recorder:
+    """Saves every camera frame plus a per-frame log, for replaying through localization offline.
+
+    <directory>/video.avi   MJPEG at high quality (frame-exact; nominal 30 fps, use the log for timing)
+    <directory>/frames.jsonl one line per frame: {"frame", "t" (unix s), **state_fn()}
+    """
+
+    def __init__(self, directory: Path, state_fn=dict, quality: int = 95):
+        directory.mkdir(parents=True, exist_ok=True)
+        self.directory = directory
+        self.state_fn = state_fn
+        self.quality = quality
+        self.writer = None
+        self.frames = 0
+        self.log = open(directory / "frames.jsonl", "w")
+        self.lock = threading.Lock()
+
+    def add(self, frame):
+        t = time.time()
+        try:
+            state = self.state_fn()
+        except Exception as exc:  # telemetry is optional; never drop the frame for it
+            state = {"state_error": str(exc)}
+        with self.lock:
+            if self.log.closed:
+                return
+            if self.writer is None:
+                height, width = frame.shape[:2]
+                self.writer = cv2.VideoWriter(str(self.directory / "video.avi"), cv2.VideoWriter_fourcc(*"MJPG"),
+                                              30.0, (width, height))
+                self.writer.set(cv2.VIDEOWRITER_PROP_QUALITY, self.quality)
+            self.writer.write(frame)
+            self.log.write(json.dumps({"frame": self.frames, "t": t, **state}) + "\n")
+            self.frames += 1
+
+    def close(self):
+        with self.lock:
+            if self.writer is not None:
+                self.writer.release()
+            self.log.close()
+        print(f"[INFO] Recorded {self.frames} frames to {self.directory}")
+
+
+def jpeg(frame) -> bytes | None:
+    ok, jpg = cv2.imencode(".jpg", frame, [cv2.IMWRITE_JPEG_QUALITY, 70])
+    return jpg.tobytes() if ok else None
 
 
 class Drone:
@@ -72,17 +179,23 @@ class Drone:
                     self.message = "land before reconnecting"
                     return
                 self._run_blocking(self.connect_and_stream, "reconnecting...")
+            elif name == "restart_video" and not self.busy:  # safe in flight
+                self._run_blocking(self.restart_video, "restarting video...")
 
     def connect_and_stream(self):
         """Redo the SDK handshake and restart video, e.g. after the drone rebooted."""
-        old = self.tello.background_frame_read
-        if old is not None:
-            old.stop()
-            self.tello.background_frame_read = None
         self.tello.connect()
+        self.restart_video()
+        print(f"[INFO] Connected. Battery {self.tello.get_battery()}%")
+
+    def restart_video(self):
+        recorder = None
+        if self.reader is not None:
+            self.reader.stop()
+            recorder = self.reader.recorder
         self.tello.streamon()
-        self.reader = self.tello.get_frame_read()
-        print(f"[INFO] Reconnected. Battery {self.tello.get_battery()}%")
+        self.reader = VideoReader()
+        self.reader.recorder = recorder  # keep recording across restarts
 
     def _run_blocking(self, command, message: str):
         def worker():
@@ -292,15 +405,11 @@ def make_handler(drone: Drone):
             try:
                 while True:
                     frame = drone.reader.frame if drone.reader is not None else None
-                    if frame is not None:
-                        # djitellopy delivers RGB; JPEG encoding expects BGR
-                        ok, jpg = cv2.imencode(".jpg", cv2.cvtColor(frame, cv2.COLOR_RGB2BGR),
-                                               [cv2.IMWRITE_JPEG_QUALITY, 70])
-                        if ok:
-                            data = jpg.tobytes()
-                            self.wfile.write(b"--frame\r\nContent-Type: image/jpeg\r\n")
-                            self.wfile.write(f"Content-Length: {len(data)}\r\n\r\n".encode())
-                            self.wfile.write(data + b"\r\n")
+                    data = jpeg(frame) if frame is not None else None
+                    if data:
+                        self.wfile.write(b"--frame\r\nContent-Type: image/jpeg\r\n")
+                        self.wfile.write(f"Content-Length: {len(data)}\r\n\r\n".encode())
+                        self.wfile.write(data + b"\r\n")
                     time.sleep(FRAME_S)
             except (BrokenPipeError, ConnectionResetError, ConnectionAbortedError):
                 pass  # browser tab closed or reloaded
@@ -318,7 +427,7 @@ def main() -> int:
     tello.connect()
     print(f"[INFO] Connected. Battery {tello.get_battery()}%")
     tello.streamon()
-    reader = tello.get_frame_read()
+    reader = VideoReader()
 
     drone = Drone(tello, max(10, min(100, args.speed)), reader)
     threading.Thread(target=drone.watchdog, daemon=True).start()

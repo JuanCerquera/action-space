@@ -1,144 +1,217 @@
 # Copyright (c) 2026, Action Space team.
 # SPDX-License-Identifier: Apache-2.0
-"""Step 1 — scene only (no learning).
+"""Isaac Lab 3.0 scene: a protected site and two hovering Crazyflies.
 
-Spawns:
-  - ground + light
-  - protected site (flat cylinder at origin)
-  - defender Crazyflie (near site)
-  - attacker Crazyflie (far side)
-Both drones hover in place so you can inspect the layout.
+Uses Isaac Lab's Newton backend without Isaac Sim or an RTX renderer.
+Run in the Python environment from the pinned Isaac Lab kitless image:
 
-Workstation usage (from your Isaac Lab install):
-
-    .\\isaaclab.bat -p C:\\path\\to\\action-space\\scripts\\01_scene.py
-
-Linux:
-
-    ./isaaclab.sh -p /path/to/action-space/scripts/01_scene.py
+    python scripts/01_scene.py --steps 2000 --check-hover
 """
 
-"""Launch Isaac Sim first."""
-
 import argparse
-
-from isaaclab.app import AppLauncher
-
-parser = argparse.ArgumentParser(description="Action Space — scene only (site + 2 drones).")
-AppLauncher.add_app_launcher_args(parser)
-args_cli = parser.parse_args()
-
-app_launcher = AppLauncher(args_cli)
-simulation_app = app_launcher.app
-
-"""Rest everything follows."""
+import json
 
 import torch
 
+from isaaclab.app import add_launcher_args, launch_simulation
+from isaaclab.assets import ArticulationCfg, AssetBaseCfg
+from isaaclab.scene import InteractiveSceneCfg
 import isaaclab.sim as sim_utils
-from isaaclab.assets import Articulation
-from isaaclab.sim import SimulationContext
+from isaaclab.utils import clone, configclass, instantiate, replace
+from isaaclab_assets import CRAZYFLIE_CFG
+from isaaclab_newton.physics import NewtonCfg
 
-from isaaclab_assets import CRAZYFLIE_CFG  # isort: skip
 
-# --- layout knobs (meters) ---
+ARENA_WIDTH = 4.0
+ARENA_LENGTH = 8.0
 SITE_RADIUS = 0.8
-DEFENDER_POS = (0.0, -1.5, 0.5)
-ATTACKER_POS = (0.0, 3.0, 0.5)
+SITE_XY = (0.0, -2.5)
+DEFENSE_HEIGHT = 1.2
+DEFENDER_POS = (0.0, -2.5, 0.5)
+ATTACKER_POS = (0.0, 3.5, 0.5)
+RESET_INTERVAL = 2000
+
+_ARENA_MAT = sim_utils.PreviewSurfaceCfg(
+    diffuse_color=(0.22, 0.28, 0.36),
+    emissive_color=(0.04, 0.06, 0.10),
+    roughness=0.85,
+)
+_RIM_MAT = sim_utils.PreviewSurfaceCfg(
+    diffuse_color=(0.55, 0.62, 0.72),
+    emissive_color=(0.12, 0.16, 0.22),
+    roughness=0.6,
+)
+_NO_COLLISION = sim_utils.CollisionPropertiesCfg(collision_enabled=False)
 
 
-def design_scene(sim: SimulationContext):
-    """Spawn ground, site marker, defender, attacker. Returns robot handles."""
-    # Ground
-    sim_utils.GroundPlaneCfg().func("/World/Ground", sim_utils.GroundPlaneCfg())
+@configclass
+class SiteDefenseSceneCfg(InteractiveSceneCfg):
+    """Rectangular arena: attacker side (+Y), defender/site side (-Y)."""
 
-    # Light
-    light = sim_utils.DomeLightCfg(intensity=2500.0, color=(0.8, 0.8, 0.8))
-    light.func("/World/Light", light)
-
-    # Protected site — flat green disk (visual only for now)
-    site = sim_utils.CylinderCfg(
-        radius=SITE_RADIUS,
-        height=0.05,
-        rigid_props=sim_utils.RigidBodyPropertiesCfg(kinematic_enabled=True),
-        mass_props=sim_utils.MassPropertiesCfg(mass=1.0),
-        collision_props=sim_utils.CollisionPropertiesCfg(),
-        visual_material=sim_utils.PreviewSurfaceCfg(diffuse_color=(0.15, 0.75, 0.25)),
+    ground = AssetBaseCfg(prim_path="/World/Ground", spawn=sim_utils.GroundPlaneCfg())
+    light = AssetBaseCfg(
+        prim_path="/World/Light",
+        spawn=sim_utils.DomeLightCfg(intensity=2500.0, color=(0.8, 0.8, 0.8)),
     )
-    site.func("/World/Site", site, translation=(0.0, 0.0, 0.025))
+    arena = AssetBaseCfg(
+        prim_path="{ENV_REGEX_NS}/Arena",
+        spawn=sim_utils.CuboidCfg(
+            size=(ARENA_WIDTH, ARENA_LENGTH, 0.03),
+            collision_props=_NO_COLLISION,
+            visual_material=_ARENA_MAT,
+        ),
+        init_state=AssetBaseCfg.InitialStateCfg(pos=(0.0, 0.0, 0.015)),
+    )
+    arena_rim_neg_x = AssetBaseCfg(
+        prim_path="{ENV_REGEX_NS}/ArenaRimNegX",
+        spawn=sim_utils.CuboidCfg(
+            size=(0.08, ARENA_LENGTH, 0.25),
+            collision_props=_NO_COLLISION,
+            visual_material=_RIM_MAT,
+        ),
+        init_state=AssetBaseCfg.InitialStateCfg(pos=(-ARENA_WIDTH * 0.5, 0.0, 0.125)),
+    )
+    arena_rim_pos_x = AssetBaseCfg(
+        prim_path="{ENV_REGEX_NS}/ArenaRimPosX",
+        spawn=sim_utils.CuboidCfg(
+            size=(0.08, ARENA_LENGTH, 0.25),
+            collision_props=_NO_COLLISION,
+            visual_material=_RIM_MAT,
+        ),
+        init_state=AssetBaseCfg.InitialStateCfg(pos=(ARENA_WIDTH * 0.5, 0.0, 0.125)),
+    )
+    arena_rim_neg_y = AssetBaseCfg(
+        prim_path="{ENV_REGEX_NS}/ArenaRimNegY",
+        spawn=sim_utils.CuboidCfg(
+            size=(ARENA_WIDTH, 0.08, 0.25),
+            collision_props=_NO_COLLISION,
+            visual_material=_RIM_MAT,
+        ),
+        init_state=AssetBaseCfg.InitialStateCfg(pos=(0.0, -ARENA_LENGTH * 0.5, 0.125)),
+    )
+    arena_rim_pos_y = AssetBaseCfg(
+        prim_path="{ENV_REGEX_NS}/ArenaRimPosY",
+        spawn=sim_utils.CuboidCfg(
+            size=(ARENA_WIDTH, 0.08, 0.25),
+            collision_props=_NO_COLLISION,
+            visual_material=_RIM_MAT,
+        ),
+        init_state=AssetBaseCfg.InitialStateCfg(pos=(0.0, ARENA_LENGTH * 0.5, 0.125)),
+    )
+    defense_volume = AssetBaseCfg(
+        prim_path="{ENV_REGEX_NS}/DefenseVolume",
+        spawn=sim_utils.CylinderCfg(
+            radius=SITE_RADIUS,
+            height=DEFENSE_HEIGHT,
+            collision_props=_NO_COLLISION,
+            visual_material=sim_utils.PreviewSurfaceCfg(
+                diffuse_color=(0.12, 0.85, 0.35),
+                emissive_color=(0.05, 0.35, 0.12),
+                opacity=0.35,
+                roughness=0.4,
+            ),
+        ),
+        init_state=AssetBaseCfg.InitialStateCfg(
+            pos=(SITE_XY[0], SITE_XY[1], DEFENSE_HEIGHT * 0.5)
+        ),
+    )
+    defender: ArticulationCfg = replace(CRAZYFLIE_CFG, prim_path="{ENV_REGEX_NS}/Defender")
+    attacker: ArticulationCfg = replace(CRAZYFLIE_CFG, prim_path="{ENV_REGEX_NS}/Attacker")
 
-    # Defender (blue-ish spawn near site)
-    defender_cfg = CRAZYFLIE_CFG.replace(prim_path="/World/Defender")
-    defender_cfg.spawn.func("/World/Defender", defender_cfg.spawn, translation=DEFENDER_POS)
-    defender = Articulation(defender_cfg)
 
-    # Attacker (far side, inbound later)
-    attacker_cfg = CRAZYFLIE_CFG.replace(prim_path="/World/Attacker")
-    attacker_cfg.spawn.func("/World/Attacker", attacker_cfg.spawn, translation=ATTACKER_POS)
-    attacker = Articulation(attacker_cfg)
-
-    return {"defender": defender, "attacker": attacker}
+def design_scene():
+    """Spawn one environment with the site marker and both Isaac Lab assets."""
+    cfg = SiteDefenseSceneCfg(num_envs=1, env_spacing=10.0)
+    cfg.defender = clone(cfg.defender)
+    cfg.attacker = clone(cfg.attacker)
+    cfg.defender.init_state.pos = DEFENDER_POS
+    cfg.attacker.init_state.pos = ATTACKER_POS
+    return instantiate(cfg)
 
 
-def _hover_wrench(robot: Articulation, sim: SimulationContext):
-    """Constant upward force so the drone holds altitude (no policy)."""
-    body_ids = robot.find_bodies("body")[0]
-    mass = robot.root_physx_view.get_masses()[0].sum().item()
-    gravity = torch.tensor(sim.cfg.gravity, device=sim.device).norm().item()
-    thrust = torch.zeros(robot.num_instances, 1, 3, device=sim.device)
-    moment = torch.zeros_like(thrust)
-    thrust[:, 0, 2] = mass * gravity
-    robot.set_external_force_and_torque(thrust, moment, body_ids=body_ids)
-
-
-def _reset_robot(robot: Articulation, spawn_pos: tuple[float, float, float], sim: SimulationContext):
-    root = robot.data.default_root_state.clone()
-    root[:, 0] = spawn_pos[0]
-    root[:, 1] = spawn_pos[1]
-    root[:, 2] = spawn_pos[2]
-    robot.write_root_pose_to_sim(root[:, :7])
-    robot.write_root_velocity_to_sim(root[:, 7:])
-    robot.write_joint_state_to_sim(robot.data.default_joint_pos, robot.data.default_joint_vel)
+def reset_robot(robot):
+    """Restore the asset's configured pose, velocity, and rotor state."""
+    robot.write_root_pose_to_sim_index(root_pose=robot.data.default_root_pose.torch.clone())
+    robot.write_root_velocity_to_sim_index(root_velocity=robot.data.default_root_vel.torch.clone())
+    robot.write_joint_position_to_sim_index(position=robot.data.default_joint_pos.torch.clone())
+    robot.write_joint_velocity_to_sim_index(velocity=robot.data.default_joint_vel.torch.clone())
     robot.reset()
-    _hover_wrench(robot, sim)
+
+
+def set_hover_force(robot, gravity):
+    """Balance total weight at the main body's center of mass, in world coordinates."""
+    body_ids = robot.find_bodies("body")[0]
+    if len(body_ids) != 1:
+        raise RuntimeError(f"Expected one Crazyflie body; found {body_ids}")
+    mass = robot.data.body_mass.torch.sum(dim=1)
+    if not torch.isfinite(mass).all() or (mass <= 0).any():
+        raise RuntimeError(f"Invalid drone mass: {mass}")
+    force = -mass[:, None, None] * torch.tensor(gravity, device=robot.device)[None, None, :]
+    robot.permanent_wrench_composer.reset()
+    robot.permanent_wrench_composer.add_forces_and_torques_index(
+        forces=force, body_ids=body_ids, is_global=True
+    )
+
+
+def run_scene(sim, robots, args):
+    """Advance physics and optionally verify hover throughout a finite smoke run."""
+    max_drift = {name: 0.0 for name in robots}
+    steps = 0
+    while sim.is_running() and (args.steps == 0 or steps < args.steps):
+        if steps % RESET_INTERVAL == 0:
+            for robot in robots.values():
+                reset_robot(robot)
+                set_hover_force(robot, sim.cfg.gravity)
+            print("[INFO] Reset drones to spawn poses.", flush=True)
+        for robot in robots.values():
+            robot.write_data_to_sim()
+        sim.step()
+        steps += 1
+        for name, robot in robots.items():
+            robot.update(sim.get_physics_dt())
+            pose = robot.data.root_pose_w.torch
+            velocity = robot.data.root_vel_w.torch
+            if not torch.isfinite(pose).all() or not torch.isfinite(velocity).all():
+                raise RuntimeError(f"{name}: non-finite state at step {steps}")
+            drift = torch.linalg.vector_norm(
+                pose[:, :3] - robot.data.default_root_pose.torch[:, :3], dim=1
+            ).max().item()
+            max_drift[name] = max(max_drift[name], drift)
+            if args.check_hover and drift > args.hover_tolerance:
+                raise RuntimeError(f"{name}: hover drift {drift:.6f} m at step {steps}")
+    if args.steps and steps != args.steps:
+        raise RuntimeError(f"Simulation stopped after {steps}/{args.steps} steps")
+    print("[INFO] Scene result: " + json.dumps({
+        "steps": steps,
+        "simulated_seconds": steps * sim.get_physics_dt(),
+        "max_drift_m": max_drift,
+        "hover_checked": args.check_hover,
+        "device": str(sim.device),
+    }), flush=True)
 
 
 def main():
-    sim_cfg = sim_utils.SimulationCfg(dt=0.005, device=args_cli.device)
-    sim = SimulationContext(sim_cfg)
-    sim.set_camera_view(eye=[4.0, -4.0, 3.0], target=[0.0, 0.5, 0.3])
+    parser = argparse.ArgumentParser(description=__doc__)
+    add_launcher_args(parser)
+    parser.add_argument("--steps", type=int, default=2000, help="Physics steps; 0 runs until interrupted.")
+    parser.add_argument("--check-hover", action="store_true", help="Fail if either drone drifts too far.")
+    parser.add_argument("--hover-tolerance", type=float, default=0.1, help="Maximum hover drift in meters.")
+    args = parser.parse_args()
+    if args.steps < 0 or not 0 < args.hover_tolerance < float("inf"):
+        parser.error("--steps must be nonnegative and --hover-tolerance must be positive and finite")
+    if args.check_hover and args.steps == 0:
+        parser.error("--check-hover requires a finite --steps value")
 
-    robots = design_scene(sim)
-    defender = robots["defender"]
-    attacker = robots["attacker"]
-
-    sim.reset()
-    print("[INFO] Scene ready.")
-    print(f"  Site radius : {SITE_RADIUS} m (green disk at origin)")
-    print(f"  Defender    : {DEFENDER_POS}")
-    print(f"  Attacker    : {ATTACKER_POS}")
-    print("[INFO] Both drones hover. Close the window when done.")
-
-    sim_dt = sim.get_physics_dt()
-    count = 0
-
-    while simulation_app.is_running():
-        if count % 2000 == 0:
-            _reset_robot(defender, DEFENDER_POS, sim)
-            _reset_robot(attacker, ATTACKER_POS, sim)
-            print("[INFO] Reset drones to spawn poses.")
-
-        _hover_wrench(defender, sim)
-        _hover_wrench(attacker, sim)
-
-        defender.write_data_to_sim()
-        attacker.write_data_to_sim()
-        sim.step()
-        defender.update(sim_dt)
-        attacker.update(sim_dt)
-        count += 1
+    sim_cfg = sim_utils.SimulationCfg(dt=0.005, device=args.device, physics=NewtonCfg())
+    with launch_simulation(sim_cfg, args):
+        sim = sim_utils.SimulationContext(sim_cfg)
+        sim.set_camera_view(eye=[6.5, 1.0, 4.0], target=[0.0, 0.0, 0.4])
+        scene = design_scene()
+        robots = {name: scene[name] for name in ("defender", "attacker")}
+        sim.reset()
+        print("[INFO] Scene ready (Isaac Lab / Newton).", flush=True)
+        run_scene(sim, robots, args)
 
 
 if __name__ == "__main__":
     main()
-    simulation_app.close()
