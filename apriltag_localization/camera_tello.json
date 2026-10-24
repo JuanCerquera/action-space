@@ -1,0 +1,6 @@
+{
+  "_comment": "APPROXIMATE Tello intrinsics at 960x720. Calibrate your own drone (cv2.calibrateCamera with a checkerboard) for best accuracy.",
+  "width": 960, "height": 720,
+  "fx": 921.17, "fy": 919.02, "cx": 459.90, "cy": 351.24,
+  "dist": [-0.0333, 0.1056, -0.0007, -0.0014, -0.2389]
+}
