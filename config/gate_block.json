@@ -1,0 +1,19 @@
+{
+  "settings": {
+    "kp": 1.791,
+    "block_gap": 0.354,
+    "block_lead": 0.591,
+    "push_radius": 0.818,
+    "push_speed": 1.219,
+    "push_wall_clearance": 0.516,
+    "goalie_offset": 0.467,
+    "beaten_margin": 0.277,
+    "beaten_cost": 1.517,
+    "detour": 0.681,
+    "push_alignment": 0.87,
+    "stickiness": 0.128,
+    "separation_radius": 0.723,
+    "wall_buffer": 0.488
+  },
+  "_note": "cloud tune arena_gate_block (real speed + knockdown model)"
+}

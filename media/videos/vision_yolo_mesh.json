@@ -1,0 +1,11 @@
+{
+  "task": "Intercept-Defense-3v2-StickyNet-v0",
+  "detector": "yolov8",
+  "relay": false,
+  "rounds": 6,
+  "win_rate": 0.3333333333333333,
+  "breach_rate": 0.6666666666666666,
+  "mesh_catches_per_round": 0.5,
+  "tracked_fraction": 0.028978388998035363,
+  "tracking_error_m": 0.2065901906885826
+}

@@ -1,0 +1,28 @@
+{
+  "_notes": [
+    "One entry per defender Tello. slot = which arena.json defender_starts spot it takes off from (0-2).",
+    "host: Tello EDU in station mode = its IP on the router; standard Tello = 192.168.10.1 (one drone only).",
+    "yaw_deg: where the nose (camera) points at takeoff, in the arena frame: 180 = facing the goal wall",
+    "(the camera then sees tags 10 and 5 for localization), 0 = facing into the room.",
+    "camera: true = stream video and localize on AprilTags (each EDU needs its own video_port).",
+    "rc_per_mps: rc units (-100..100) per 1 m/s; measure with --speed_test before the first real flight.",
+    "net: true = this drone carries a hanging mesh strip; it then flies above the attackers so they meet the mesh."
+  ],
+  "rc_per_mps": [
+    125.0,
+    137.0,
+    167.0
+  ],
+  "drones": [
+    {
+      "name": "D1",
+      "host": "192.168.10.1",
+      "slot": 1,
+      "yaw_deg": 180,
+      "camera": false,
+      "video_port": 11111,
+      "net": false,
+      "camera_yaml": "config/camera/tello_3.yaml"
+    }
+  ]
+}

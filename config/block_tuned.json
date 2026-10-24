@@ -1,0 +1,100 @@
+{
+  "_note": "Block controller settings auto-tuned by scripts/tune_block.py (CEM) in the randomized game.",
+  "task": "Intercept-Defense-3v2-v0",
+  "win_rate": 0.7422,
+  "default_win_rate": 0.634,
+  "rounds": 2867,
+  "settings": {
+    "kp": 2.196,
+    "block_gap": 0.347,
+    "block_lead": 0.402,
+    "push_radius": 0.914,
+    "push_speed": 0.993,
+    "push_wall_clearance": 0.696,
+    "goalie_offset": 0.394,
+    "beaten_margin": 0.214,
+    "beaten_cost": 1.751,
+    "detour": 0.561,
+    "push_alignment": 0.792,
+    "stickiness": 0.51,
+    "separation_radius": 0.658,
+    "wall_buffer": 0.602
+  },
+  "history": [
+    {
+      "gen": 0,
+      "mean_win": 0.5676567554473877,
+      "best_win": 0.6816608905792236
+    },
+    {
+      "gen": 1,
+      "mean_win": 0.6219931244850159,
+      "best_win": 0.6678200960159302
+    },
+    {
+      "gen": 2,
+      "mean_win": 0.7659574747085571,
+      "best_win": 0.7659574747085571
+    },
+    {
+      "gen": 3,
+      "mean_win": 0.6598639488220215,
+      "best_win": 0.75789475440979
+    },
+    {
+      "gen": 4,
+      "mean_win": 0.7400721907615662,
+      "best_win": 0.7455196976661682
+    },
+    {
+      "gen": 5,
+      "mean_win": 0.7571428418159485,
+      "best_win": 0.7659574747085571
+    },
+    {
+      "gen": 6,
+      "mean_win": 0.7535714507102966,
+      "best_win": 0.7824561595916748
+    },
+    {
+      "gen": 7,
+      "mean_win": 0.725978672504425,
+      "best_win": 0.7659574747085571
+    },
+    {
+      "gen": 8,
+      "mean_win": 0.7667844295501709,
+      "best_win": 0.7667844295501709
+    },
+    {
+      "gen": 9,
+      "mean_win": 0.8214285969734192,
+      "best_win": 0.8214285969734192
+    },
+    {
+      "gen": 10,
+      "mean_win": 0.76241135597229,
+      "best_win": 0.76241135597229
+    },
+    {
+      "gen": 11,
+      "mean_win": 0.696864128112793,
+      "best_win": 0.7921146750450134
+    },
+    {
+      "gen": 12,
+      "mean_win": 0.7218309640884399,
+      "best_win": 0.7617328763008118
+    },
+    {
+      "gen": 13,
+      "mean_win": 0.7695035338401794,
+      "best_win": 0.7695035338401794
+    },
+    {
+      "gen": 14,
+      "mean_win": 0.7157894968986511,
+      "best_win": 0.7761732935905457
+    }
+  ]
+}

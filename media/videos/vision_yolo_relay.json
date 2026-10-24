@@ -1,0 +1,11 @@
+{
+  "task": "Intercept-Defense-3v2-v0",
+  "detector": "yolov8",
+  "relay": true,
+  "rounds": 6,
+  "win_rate": 0.3333333333333333,
+  "breach_rate": 0.3333333333333333,
+  "mesh_catches_per_round": 0.0,
+  "tracked_fraction": 0.015883977900552487,
+  "tracking_error_m": 0.26245426614185696
+}

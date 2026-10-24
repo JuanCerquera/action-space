@@ -1,0 +1,310 @@
+{
+  "_notes": [
+    "Hackathon room (photos 2026-10-24 10:24): ESTIMATED FROM PHOTOS - measure and correct every number.",
+    "Use it with ARENA_JSON=arena_gate (sim, replays, ground station); config/arena.json stays the old layout.",
+    "Reading of the photos: the DEFENSE SIDE is the end with the two standing white panels (each with a tag);",
+    "the gap between them is the goal the attackers try to reach. Our 3 Tellos take off from the orange X marks",
+    "in front of the panels. The ATTACK SIDE is the far end with the big tag 10 on the white wall (attackers start there).",
+    "Side walls: tables/windows on one side (+y), the glass door with a tag on its window on the other (-y).",
+    "Frame: origin on the floor at the middle of the gap between the panels, +x toward the attack side (tag 10),",
+    "+z up, +y to your right when you face the panels from the field. Units: meters.",
+    "Tag ids were read from the photos with the AprilTag detector (36h11); positions are still estimates.",
+    "Tag 'normal' = direction the printed face points; 'up' = toward the printed header.",
+    "Tag sizes from the team's tags.yaml: tags 1-9 (and 11) are 5.2 in = 132.08 mm black squares, tag 10 is 571.5 mm."
+  ],
+  "tag_family": "tag36h11",
+  "room": {
+    "x": [
+      0.0,
+      8.0
+    ],
+    "y": [
+      -3.5,
+      3.5
+    ],
+    "z": [
+      0.0,
+      3.0
+    ]
+  },
+  "far_wall": true,
+  "goal": {
+    "tag_id": 9,
+    "_zone_note": "Attackers score by flying into the gap between the panels (from 0.2 m up to the panel tops), up to 0.3 m in front of it.",
+    "zone": {
+      "x": [
+        0.0,
+        0.3
+      ],
+      "y": [
+        -0.6,
+        0.6
+      ],
+      "z": [
+        0.2,
+        1.9
+      ]
+    }
+  },
+  "obstacles": [
+    {
+      "name": "panel_left",
+      "center": [
+        0.03,
+        -0.95,
+        0.95
+      ],
+      "size": [
+        0.06,
+        0.65,
+        1.9
+      ]
+    },
+    {
+      "name": "panel_right",
+      "center": [
+        0.03,
+        0.95,
+        0.95
+      ],
+      "size": [
+        0.06,
+        0.65,
+        1.9
+      ]
+    }
+  ],
+  "tags": [
+    {
+      "id": 9,
+      "size_m": 0.13208,
+      "center": [
+        0.07,
+        -0.95,
+        1.3
+      ],
+      "normal": [
+        1,
+        0,
+        0
+      ],
+      "up": [
+        0,
+        0,
+        1
+      ],
+      "_where": "left panel (defense side)"
+    },
+    {
+      "id": 6,
+      "size_m": 0.13208,
+      "center": [
+        0.07,
+        0.95,
+        1.3
+      ],
+      "normal": [
+        1,
+        0,
+        0
+      ],
+      "up": [
+        0,
+        0,
+        1
+      ],
+      "_where": "right panel (defense side)"
+    },
+    {
+      "id": 11,
+      "size_m": 0.13208,
+      "center": [
+        0.9,
+        -0.55,
+        0.0
+      ],
+      "normal": [
+        0,
+        0,
+        1
+      ],
+      "up": [
+        -1,
+        0,
+        0
+      ],
+      "_where": "floor, in front of the left panel"
+    },
+    {
+      "id": 2,
+      "size_m": 0.13208,
+      "center": [
+        1.2,
+        0.65,
+        0.0
+      ],
+      "normal": [
+        0,
+        0,
+        1
+      ],
+      "up": [
+        -1,
+        0,
+        0
+      ],
+      "_where": "floor, in front of the right panel"
+    },
+    {
+      "id": 1,
+      "size_m": 0.13208,
+      "center": [
+        2.9,
+        -0.2,
+        0.0
+      ],
+      "normal": [
+        0,
+        0,
+        1
+      ],
+      "up": [
+        -1,
+        0,
+        0
+      ],
+      "_where": "big floor tag in the field (size estimated)"
+    },
+    {
+      "id": 7,
+      "size_m": 0.13208,
+      "center": [
+        5.2,
+        -0.4,
+        0.0
+      ],
+      "normal": [
+        0,
+        0,
+        1
+      ],
+      "up": [
+        -1,
+        0,
+        0
+      ],
+      "_where": "floor, attack half"
+    },
+    {
+      "id": 4,
+      "size_m": 0.13208,
+      "center": [
+        6.6,
+        0.9,
+        0.0
+      ],
+      "normal": [
+        0,
+        0,
+        1
+      ],
+      "up": [
+        -1,
+        0,
+        0
+      ],
+      "_where": "floor near the tag-10 wall"
+    },
+    {
+      "id": 10,
+      "size_m": 0.5715,
+      "center": [
+        8.0,
+        0.0,
+        1.45
+      ],
+      "normal": [
+        -1,
+        0,
+        0
+      ],
+      "up": [
+        0,
+        0,
+        1
+      ],
+      "_where": "attack-side wall (big tag)"
+    },
+    {
+      "id": 5,
+      "size_m": 0.13208,
+      "center": [
+        7.6,
+        -2.2,
+        1.5
+      ],
+      "normal": [
+        0,
+        1,
+        0
+      ],
+      "up": [
+        0,
+        0,
+        1
+      ],
+      "_where": "side wall next to tag 10 (glass side)"
+    },
+    {
+      "id": 8,
+      "size_m": 0.13208,
+      "center": [
+        4.0,
+        -3.5,
+        1.5
+      ],
+      "normal": [
+        0,
+        1,
+        0
+      ],
+      "up": [
+        0,
+        0,
+        1
+      ],
+      "_where": "glass door window (-y side)"
+    }
+  ],
+  "defender_starts": [
+    [
+      0.55,
+      -0.9,
+      0.0
+    ],
+    [
+      0.45,
+      0.75,
+      0.0
+    ],
+    [
+      1.25,
+      -0.75,
+      0.0
+    ]
+  ],
+  "attacker_spawn": {
+    "x": [
+      6.2,
+      7.5
+    ],
+    "y": [
+      -2.5,
+      2.5
+    ],
+    "z": [
+      0.8,
+      1.8
+    ]
+  }
+}

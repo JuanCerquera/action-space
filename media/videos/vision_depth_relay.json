@@ -1,0 +1,11 @@
+{
+  "task": "Intercept-Defense-3v2-v0",
+  "detector": "depth",
+  "relay": true,
+  "rounds": 6,
+  "win_rate": 0.5,
+  "breach_rate": 0.5,
+  "mesh_catches_per_round": 0.0,
+  "tracked_fraction": 0.9122137404580153,
+  "tracking_error_m": 0.059706100280344836
+}

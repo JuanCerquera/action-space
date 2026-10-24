@@ -1,0 +1,25 @@
+{
+  "_note": "scripts/fast_sim.py tune (CEM)",
+  "task": "defense",
+  "arena": "arena_team",
+  "real_speed": true,
+  "fixed": {},
+  "win_rate": 0.5739,
+  "start_win_rate": 0.5376,
+  "settings": {
+    "kp": 2.017,
+    "block_gap": 0.444,
+    "block_lead": 0.482,
+    "push_radius": 0.765,
+    "push_speed": 0.946,
+    "push_wall_clearance": 0.555,
+    "goalie_offset": 0.453,
+    "beaten_margin": 0.205,
+    "beaten_cost": 1.984,
+    "detour": 0.79,
+    "push_alignment": 0.821,
+    "stickiness": 0.065,
+    "separation_radius": 0.744,
+    "wall_buffer": 0.49
+  }
+}

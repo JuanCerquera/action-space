@@ -1,0 +1,155 @@
+{
+  "_notes": [
+    "Shared arena map for the sim (training env + Isaac Sim twin) and the real Tellos.",
+    "ALL POSITIONS ARE PLACEHOLDERS - measure the real room and update them.",
+    "Frame: origin on the floor directly below the center of tag 10 (the goal) on the goal wall.",
+    "+x points from the goal wall into the room, +z is up, +y completes a right-handed frame",
+    "(+y is to your right when you face the goal wall). Units: meters.",
+    "Tag 'size_m' is the edge of the black square (what the detector measures).",
+    "Tag 'normal' is the direction the printed face points; 'up' points from the tag center",
+    "toward the printed 'APRILTAG 36h11 / ID n' header. right = cross(up, normal).",
+    "Tag sizes from the team's tags.yaml: tags 1-9 (and 11) are 5.2 in = 132.08 mm black squares, tag 10 is 571.5 mm."
+  ],
+  "tag_family": "tag36h11",
+  "room": {
+    "x": [
+      0.0,
+      8.0
+    ],
+    "y": [
+      -3.0,
+      3.0
+    ],
+    "z": [
+      0.0,
+      3.0
+    ]
+  },
+  "goal": {
+    "tag_id": 10,
+    "_zone_note": "Attacker scores by touching the goal tag: zone = tag face + 0.1 m on each side, out to 0.3 m from the wall.",
+    "zone": {
+      "x": [
+        0.0,
+        0.3
+      ],
+      "y": [
+        -0.39,
+        0.39
+      ],
+      "z": [
+        1.21,
+        1.99
+      ]
+    }
+  },
+  "tags": [
+    {
+      "id": 10,
+      "size_m": 0.5715,
+      "center": [
+        0.0,
+        0.0,
+        1.6
+      ],
+      "normal": [
+        1,
+        0,
+        0
+      ],
+      "up": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": 5,
+      "size_m": 0.13208,
+      "center": [
+        0.6,
+        2.2,
+        1.5
+      ],
+      "normal": [
+        1,
+        0,
+        0
+      ],
+      "up": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": 4,
+      "size_m": 0.13208,
+      "center": [
+        2.0,
+        -0.8,
+        0.0
+      ],
+      "normal": [
+        0,
+        0,
+        1
+      ],
+      "up": [
+        -1,
+        0,
+        0
+      ]
+    },
+    {
+      "id": 7,
+      "size_m": 0.13208,
+      "center": [
+        3.0,
+        1.5,
+        0.0
+      ],
+      "normal": [
+        0,
+        0,
+        1
+      ],
+      "up": [
+        -1,
+        0,
+        0
+      ]
+    }
+  ],
+  "defender_starts": [
+    [
+      2.0,
+      -1.5,
+      0.0
+    ],
+    [
+      2.0,
+      0.0,
+      0.0
+    ],
+    [
+      2.0,
+      1.5,
+      0.0
+    ]
+  ],
+  "attacker_spawn": {
+    "x": [
+      6.0,
+      7.5
+    ],
+    "y": [
+      -2.5,
+      2.5
+    ],
+    "z": [
+      0.8,
+      1.8
+    ]
+  }
+}
