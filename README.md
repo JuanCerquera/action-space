@@ -283,3 +283,17 @@ docs/          SF Compute guides, README images
 [`docs/sf_compute_cli_setup.md`](docs/sf_compute_cli_setup.md) (sf CLI and Isaac Lab on a VM, by Juan)
 and [`docs/sfcompute_training.md`](docs/sfcompute_training.md) (training runs). `scripts/01_scene.py` is
 the original Isaac Lab site-defense scene scaffold.
+
+## Team defense policy for the judges runner (tello-blocker work)
+
+- **Drop-in policy:** `dist/policy.py`, one file for the judges' `drone_deployment_infra/swarm_ops/policies/`;
+  add `from .policy import *` as the last line of `policies/__init__.py`. It registers `defense` (3-drone team:
+  blockers hold each attacker's line to our net, a keeper, rams at the ram line or on steady attackers) and
+  `movetest`. Details and run commands: [deploy/swarm_ops/README.md](deploy/swarm_ops/README.md).
+  Rebuild after code changes: `python scripts/build_policy.py`.
+- **Logic:** `defense/team.py` (roles, sticky pairs, rams, spacing) and `defense/blocker.py` (geometry, Tello rc).
+- **Room sim:** `scripts/03_team_defense.py`, an Isaac Lab 3.0 scene of the judges' room built from their AprilTag
+  map (`config/judges_map.yaml`): 3 defenders flown from `dist/policy.py` vs 2 scripted attackers, Viser viewer
+  (`--viz viser --from-policy`), episode recorder (`--record`).
+- **Tests:** `python tests/test_blocker.py`, `tests/test_swarm_policy.py`, `tests/test_tag_localizer.py`,
+  `tests/test_move_test.py`.

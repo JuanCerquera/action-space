@@ -89,3 +89,7 @@ config/realsense_extrinsics.json
 # pretrained weights downloaded by ultralytics
 *.pt
 weights/
+*.pth
+
+# Camera recordings from the Tello test panel
+recordings/
