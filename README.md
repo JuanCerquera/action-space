@@ -255,6 +255,7 @@ policy does not need this pipeline.
 ## Repo layout
 
 ```
+apriltag_localization/  real-hardware Tello localization from AprilTags (camera -> xyz + quaternion), by Priyanka
 config/        rooms (arena_*.json), tuned settings, Tello camera calibrations, drone list (tellos.json)
 integration/   drop-in defense policy for the team's swarm_ops runner
 scripts/       fast_sim (no-Isaac game, tune, record), replays, README media, Isaac viewers, vision, YOLO
