@@ -22,9 +22,20 @@ Blue defenders, red attackers, at their real heights (the thin stalks and floor 
 The yellow bars hanging under the defenders are the taped mesh strips; the panels and the red goal box
 between them are the defended gap.
 
+## Strategy videos
+
+- [`media/videos/strategies_1min.mp4`](media/videos/strategies_1min.mp4) (48 s): the six main strategies,
+  each with its signature move highlighted in orange (mesh catch, push, hold at zone 2, reinforce,
+  handover + retreat, kamikaze ram, holding the box edge), top view and 3D side by side.
+- [`media/videos/strategies_overview.mp4`](media/videos/strategies_overview.mp4) (80 s): every strategy,
+  including kamikaze + relay and the Warhammer 40k version.
+
+Made from the recorded rounds by `scripts/make_strategy_video.py` (`--minute` for the short cut).
+
 ## Contents
 
 1. [3D simulation](#3d-simulation)
+1. [Strategy videos](#strategy-videos)
 1. [The game](#the-game)
 2. [The room](#the-room)
 3. [Strategies, with simulations](#strategies-with-simulations)
