@@ -12,7 +12,8 @@ one of them on SF Compute H100s, and packaged the winner as a drop-in policy for
 (interactive: pick a strategy, drag to orbit the room, scroll to zoom, scrub through the round; each
 drone's floating tag says what it is doing). The link is private until its owner shares it from the
 page's Share menu. The same page is in the repo as
-[`docs/web/action_space_3d.html`](docs/web/action_space_3d.html) (4 MB, download and open), and the
+[`docs/web/Action_Space_3D_Replay.html`](docs/web/Action_Space_3D_Replay.html) (4 MB: download it and
+open it in any browser, no install), and the
 full version with every recorded round as [`media/replay/replay3d_arena_gate.html`](media/replay/replay3d_arena_gate.html).
 
 ![3D: taped mesh](docs/img/mesh_3d.gif)
@@ -254,7 +255,7 @@ python scripts/fast_sim.py record --arena arena_gate --real_speed --tuned config
 ARENA_JSON=arena_gate python scripts/build_replay.py          # 2D + 3D replay pages in media/replay/
 python scripts/make_readme_media.py                            # top-view GIFs and charts in docs/img/
 python scripts/make_readme_3d.py                               # 3D GIFs (run from scripts/)
-python scripts/build_web_replay.py                             # light web 3D replay, docs/web/
+python scripts/build_web_replay.py                             # light web 3D replay for hosting
 ```
 
 With Isaac Lab 2.3 / Isaac Sim 5.1: `scripts/play_arena.py` (live 3D viewer with Tello models),

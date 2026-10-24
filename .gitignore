@@ -93,3 +93,6 @@ weights/
 
 # Camera recordings from the Tello test panel
 recordings/
+
+# web replay fragment built for hosting (scripts/build_web_replay.py); the standalone copy is docs/web/Action_Space_3D_Replay.html
+docs/web/action_space_3d.html
