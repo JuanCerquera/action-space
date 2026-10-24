@@ -188,7 +188,7 @@ def results_png(rows):
     ax.barh(names, wins, color=colors)
     for y, w in enumerate(wins):
         ax.text(w + 0.4, y, f"{w:.1f}%", va="center", fontsize=8)
-    ax.set_xlim(70, 100)
+    ax.set_xlim(80, 100)
     ax.set_xlabel("win rate (%), 2,000 identical rounds, real Tello speed")
     ax.set_title("Strategies in the photographed room", fontsize=10, loc="left")
     path = os.path.join(OUT, "results.png")
@@ -199,8 +199,8 @@ def results_png(rows):
 
 def main():
     gate = os.path.join(REPO, "config", "arena_gate.json")
-    results_png([("Taped mesh + relay", 94.7), ("Tuned blocking", 89.1), ("3 zones", 87.8), ("Relay blocking", 87.8),
-                 ("Kamikaze keeper", 87.3), ("Kamikaze + relay", 85.4), ("Zone 1v1 (defense box)", 84.1)])
+    results_png([("Taped mesh + relay", 99.0), ("Tuned blocking", 95.5), ("3 zones", 94.9), ("Kamikaze keeper", 94.6),
+                 ("Relay blocking", 94.0), ("Kamikaze + relay", 91.5), ("Zone 1v1 (defense box)", 90.7)])
     zones_png(gate, load(os.path.join(REPO, "config", "gate_layers.json"))["settings"]["layers"])
     make_gif("gate_block", "Tuned blocking", "block.gif", gate, want="push")
     make_gif("gate_mesh", "Taped mesh + relay", "mesh.gif", gate, want="CAUGHT".lower().replace("caught", "caught in mesh"))

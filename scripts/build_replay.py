@@ -270,7 +270,7 @@ def main():
     if not data:
         raise SystemExit(f"No recordings in {REPLAY_DIR}; run eval_controllers.py --record_steps first.")
     # show the recommended controller first
-    order = ["gate_layers", "gate_40k_three_walls", "gate_mesh", "gate_block", "gate_relay", "gate_kamikaze", "gate_40k_nets_of_purity", "gate_40k_shield_wall", "team_mesh", "team_block", "team_layers", "team_relay", "team_kamikaze", "team_40k_nets_of_purity", "team_40k_shield_wall", "taped_mesh_relay", "relay_blocking", "taped_mesh", "zone_1v1", "gate_taped_mesh_relay", "gate_block", "block_defense", "ppo_defense", "block_bump", "ppo_bump"]
+    order = ["gate_layers", "gate_40k_three_walls", "gate_mesh", "gate_block", "gate_relay", "gate_kamikaze", "gate_kamikaze_demo_wide_strike", "gate_40k_nets_of_purity", "gate_40k_shield_wall", "team_mesh", "team_block", "team_layers", "team_relay", "team_kamikaze", "team_40k_nets_of_purity", "team_40k_shield_wall", "taped_mesh_relay", "relay_blocking", "taped_mesh", "zone_1v1", "gate_taped_mesh_relay", "gate_block", "block_defense", "ppo_defense", "block_bump", "ppo_bump"]
     data = dict(sorted(data.items(), key=lambda kv: order.index(kv[0]) if kv[0] in order else len(order)))
     suffix = "" if ARENA_NAME == "arena" else "_" + ARENA_NAME
     out = os.path.join(REPLAY_DIR, f"replay{suffix}.html")

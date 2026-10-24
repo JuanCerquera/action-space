@@ -89,7 +89,7 @@ class DefenseEnvCfg(DirectRLEnvCfg):
     def_max_speed_z = 1.0  # [m/s]
     def_speed_scale_range = (0.85, 1.05)  # battery / airframe differences
     def_vel_tau_range = (0.12, 0.45)  # velocity tracking lag [s]
-    def_spawn_jitter = 0.3  # [m]
+    def_spawn_jitter = ARENA.get("defender_spawn_jitter", 0.3)  # scatter around the takeoff spots [m]
     def_spawn_height = (0.8, 1.2)  # after takeoff [m]
     def_failure_prob = 0.3  # chance per round that one defender fails mid-round (battery, link loss)
     def_failure_time = (2.0, 25.0)  # [s]

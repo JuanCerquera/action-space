@@ -506,6 +506,18 @@ class DefenseEnv(DirectRLEnv):
         self.def_pos[env_ids] = self.def_starts.expand(k, -1, -1).clone()
         self.def_pos[env_ids, :, :2] += u((-cfg.def_spawn_jitter, cfg.def_spawn_jitter), k, nd, 2)
         self.def_pos[env_ids, :, 2] = u(cfg.def_spawn_height, k, nd)
+        if self.obs_lo.shape[0]:
+            # never start inside (or touching) an obstacle: move a defender out through the nearest face
+            margin = cfg.obstacle_margin + 0.15
+            for lo, hi in zip(self.obs_lo - margin, self.obs_hi + margin):
+                p = self.def_pos[env_ids]
+                inside = torch.all((p > lo) & (p < hi), dim=-1)
+                if bool(inside.any()):
+                    d = torch.cat([p - lo, hi - p], dim=-1)
+                    face = torch.argmin(d, dim=-1)
+                    bound = torch.where(face >= 3, hi[face % 3], lo[face % 3]).unsqueeze(-1)
+                    moved = p.scatter(-1, (face % 3).unsqueeze(-1), bound)
+                    self.def_pos[env_ids] = torch.where(inside.unsqueeze(-1), moved, p)
         self.def_vel[env_ids] = 0.0
         self.def_tau[env_ids] = u(cfg.def_vel_tau_range, k, nd, 1)
         self.def_speed_scale[env_ids] = u(cfg.def_speed_scale_range, k, nd, 1)

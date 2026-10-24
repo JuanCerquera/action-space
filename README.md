@@ -54,7 +54,7 @@ dots are our defenders, red dots the attackers, gray means down; the text next t
 controller is doing at that moment. All strategies are switches of one controller,
 `tello/controllers.py` (`BlockController`).
 
-### 1. Tuned blocking (default): 89.1% wins
+### 1. Tuned blocking (default): 95.5% wins
 
 ![Tuned blocking](docs/img/block.gif)
 
@@ -69,7 +69,7 @@ controller is doing at that moment. All strategies are switches of one controlle
 - **Losses:** downed defenders drop out of the plan; outnumbered survivors all fall back to the goal.
 - Safety: teammates keep 0.72 m apart (tuned), stay off walls and panels, and never fly into the goal zone.
 
-### 2. Taped mesh + relay: 94.7% wins (best)
+### 2. Taped mesh + relay: 99.0% wins (best)
 
 ![Taped mesh](docs/img/mesh.gif)
 
@@ -80,7 +80,7 @@ mesh tears off and falls with it (yellow square), and our drone flies on without
 to normal blocking. In the GIF both attackers are caught within seconds. **This number rests on the
 85% stick assumption: test the tape on real drones first.**
 
-### 3. Three zones: 87.8% wins
+### 3. Three zones: 94.9% wins
 
 ![Three zones](docs/img/layers.gif)
 
@@ -96,7 +96,7 @@ Demo with a larger 2.5 m danger zone so the reinforcement is visible ("REINFORCE
 zone, attackers only got that close after two defenders were already down, when the rule keeps the last
 one on goal instead.
 
-### 4. Relay blocking: 87.8% wins
+### 4. Relay blocking: 94.0% wins
 
 ![Relay](docs/img/relay.gif)
 
@@ -104,17 +104,18 @@ Man-to-man marking with a sweeper. Each marker predicts its attacker's path from
 the first point on that path it can reach in time. A beaten marker hands its attacker to the defender in
 front and retreats around the attacker to the defense point, becoming the new sweeper.
 
-### 5. Kamikaze keeper: 87.3% wins
+### 5. Kamikaze keeper: 94.6% wins
 
 ![Kamikaze](docs/img/kamikaze.gif)
 
 The defender nearest the goal is the keeper. It holds the line to the closest attacker inside a keeper
 zone, and when that attacker comes within strike range (1.44 m, tuned) it rams it at full speed, aiming
-where it is going ("KAMIKAZE"). A knocked-down attacker stays down: 3v2 becomes 2v1, a marker becomes the
+where it is going ("KAMIKAZE"). The 3D replay also has a demo clip with a wider strike range
+(`gate_kamikaze_demo_wide_strike`). A knocked-down attacker stays down: 3v2 becomes 2v1, a marker becomes the
 new keeper, and it can strike the last attacker. At Tello speed (closing speed at most about 1.5 m/s) a
 ram only knocks a drone down part of the time, so this is a last resort rather than a game changer.
 
-### 6. Zone 1v1 (defense box): 84.1% wins
+### 6. Zone 1v1 (defense box): 90.7% wins
 
 Every defender stays inside a box in front of the goal; each marker sits on its attacker's line at the
 box edge until the attacker enters the box. It never gets drawn out by a bait, but attackers get a free
@@ -134,13 +135,18 @@ Nets of Purity (mesh), Three Walls (zones), Rotating Ranks (relay), For the Empe
 
 | Strategy | Win | Breach | Defenders lost / round | `DEFEND_STRATEGY=` |
 |---|---|---|---|---|
-| **Taped mesh + relay** | **94.7%** | 3.1% | 0.54 | `mesh` |
-| Tuned blocking | 89.1% | 9.8% | 0.72 | `block` (default) |
-| 3 zones | 87.8% | 10.7% | 0.69 | `layers` |
-| Relay blocking | 87.8% | 11.1% | 0.73 | `relay` |
-| Kamikaze keeper | 87.3% | 8.5% | 0.80 | `kamikaze` |
-| Kamikaze + relay | 85.4% | 10.1% | 0.87 | - |
-| Zone 1v1 (defense box) | 84.1% | 13.2% | 0.77 | - |
+| **Taped mesh + relay** | **99.0%** | 0.7% | 0.21 | `mesh` |
+| Tuned blocking | 95.5% | 4.3% | 0.42 | `block` (default) |
+| 3 zones | 94.9% | 4.8% | 0.37 | `layers` |
+| Kamikaze keeper | 94.6% | 4.7% | 0.47 | `kamikaze` |
+| Relay blocking | 94.0% | 5.6% | 0.44 | `relay` |
+| Kamikaze + relay | 91.5% | 7.3% | 0.59 | - |
+| Zone 1v1 (defense box) | 90.7% | 8.6% | 0.44 | - |
+
+These include a 30% chance per round that one defender fails mid-flight (battery, radio). An earlier
+version scattered the takeoff spots by up to 0.3 m, which put a drone inside a panel at takeoff in about
+a third of the rounds; the X marks are taped spots, so the scatter is now 0.1 m (the numbers above).
+The GIFs and the 3D replay are showcase rounds without the random failure.
 
 **How we got there** (earlier rooms and settings, for reference):
 
@@ -270,8 +276,6 @@ docs/          SF Compute guides, README images
 - Measure the room: the panels, the X marks, the tag positions and the walls of the flying area, then
   update `config/arena_gate.json` and re-tune (about 15 minutes on one H100).
 - Knockdown and mesh catch probabilities are assumptions; a few bump tests on real drones would pin them down.
-- Defenders clip a panel about once every 3 rounds in the sim, in every strategy; worth a look at the
-  takeoff positions and panel margins.
 - The team's measured tag map and the photos disagree on the panel tags; one more mapping pass would settle it.
 
 ## SF Compute guides

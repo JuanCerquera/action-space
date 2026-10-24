@@ -10,7 +10,8 @@
     "+z up, +y to your right when you face the panels from the field. Units: meters.",
     "Tag ids were read from the photos with the AprilTag detector (36h11); positions are still estimates.",
     "Tag 'normal' = direction the printed face points; 'up' = toward the printed header.",
-    "Tag sizes from the team's tags.yaml: tags 1-9 (and 11) are 5.2 in = 132.08 mm black squares, tag 10 is 571.5 mm."
+    "Tag sizes from the team's tags.yaml: tags 1-9 (and 11) are 5.2 in = 132.08 mm black squares, tag 10 is 571.5 mm.",
+    "defender_spawn_jitter: defenders take off from taped X marks, so they start within 0.1 m of them."
   ],
   "tag_family": "tag36h11",
   "room": {
@@ -306,5 +307,6 @@
       0.8,
       1.8
     ]
-  }
+  },
+  "defender_spawn_jitter": 0.1
 }
